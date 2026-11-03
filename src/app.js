@@ -399,15 +399,9 @@ function classify(status) {
   const exitAngle = direction * 16;
 
   // Mantém a posição exata de soltura antes de iniciar a saída.
-  const currentTransform = getComputedStyle(container).transform;
-  const currentOpacity = getComputedStyle(container).opacity;
   container.classList.remove("is-entering", "is-dragging", "is-settling");
-  container.style.transition = "none";
-  container.style.transform = currentTransform === "none" ? "translate3d(0,0,0)" : currentTransform;
-  container.style.opacity = currentOpacity;
-  void container.offsetWidth;
 
-  // A transição parte do deslocamento atual, sem redefinir a origem.
+  // Preserva a última transformação aplicada pelo gesto sem forçar layout.
   requestAnimationFrame(() => {
     if (!state.transitioning || state.screen !== "study") return;
     container.style.transition = "transform 250ms cubic-bezier(.22,.7,.25,1), opacity 250ms ease-out";
@@ -469,7 +463,7 @@ function resetDrag() {
 }
 
 function onPointerDown(event) {
-  if (event.button !== 0 || state.screen !== "study" || state.pointer || state.transitioning || !currentChunk()) {
+  if (event.pointerType === "touch" || event.button !== 0 || state.screen !== "study" || state.pointer || state.transitioning || !currentChunk()) {
     return;
   }
   if (event.target instanceof Element && event.target.closest("#writingForm")) {
@@ -480,6 +474,7 @@ function onPointerDown(event) {
 }
 
 function onPointerMove(event) {
+  if (event.pointerType === "touch") return;
   const pointer = state.pointer;
   if (!pointer || pointer.id !== event.pointerId || state.transitioning) {
     return;
@@ -506,6 +501,7 @@ function onPointerMove(event) {
 }
 
 function onPointerUp(event) {
+  if (event.pointerType === "touch") return;
   const pointer = state.pointer;
   if (!pointer || pointer.id !== event.pointerId) {
     return;
@@ -524,6 +520,88 @@ function onPointerUp(event) {
     return;
   }
   classify(dx > 0 ? "mastered" : "learning");
+}
+
+function onTouchStart(event) {
+  if (
+    event.touches.length !== 1
+    || state.screen !== "study"
+    || state.transitioning
+    || !currentChunk()
+    || !elements.swipeTutorial.hidden
+    || event.target.closest("#writingForm")
+  ) {
+    return;
+  }
+
+  const touch = event.changedTouches[0];
+  state.touch = {
+    id: touch.identifier,
+    x: touch.clientX,
+    y: touch.clientY,
+    startedAt: performance.now(),
+    dx: 0,
+    moved: false
+  };
+}
+
+function onTouchMove(event) {
+  const touchState = state.touch;
+  if (!touchState || state.transitioning) return;
+
+  const touch = Array.from(event.changedTouches).find((item) => item.identifier === touchState.id);
+  if (!touch) return;
+
+  const dx = touch.clientX - touchState.x;
+  const dy = touch.clientY - touchState.y;
+
+  if (!touchState.moved && Math.abs(dx) < 6) return;
+  if (!touchState.moved && Math.abs(dy) > Math.abs(dx) * 1.25) return;
+
+  if (event.cancelable) event.preventDefault();
+
+  touchState.moved = true;
+  touchState.dx = dx;
+  const container = elements.flashcardContainer;
+  container.classList.remove("is-settling", "is-entering");
+  container.classList.add("is-dragging");
+  container.style.transition = "none";
+  container.style.transform = `translate3d(${dx}px, 0, 0) rotate(${dx / 30}deg)`;
+  container.style.opacity = String(Math.max(0.65, 1 - Math.abs(dx) / 700));
+  elements.swipeHintLeft.style.opacity = dx < 0 ? String(Math.min(1, -dx / 80)) : "0";
+  elements.swipeHintRight.style.opacity = dx > 0 ? String(Math.min(1, dx / 80)) : "0";
+}
+
+function onTouchEnd(event) {
+  const touchState = state.touch;
+  if (!touchState) return;
+
+  const touch = Array.from(event.changedTouches).find((item) => item.identifier === touchState.id);
+  if (!touch) return;
+
+  state.touch = null;
+  if (!touchState.moved) return;
+
+  if (event.cancelable) event.preventDefault();
+  state.suppressClick = true;
+  window.setTimeout(() => { state.suppressClick = false; }, 250);
+
+  if (event.type === "touchcancel") {
+    resetDrag();
+    return;
+  }
+
+  const dx = touchState.dx;
+  const duration = Math.max(1, performance.now() - touchState.startedAt);
+  const velocity = Math.abs(dx) / duration;
+  const threshold = Math.min(100, elements.flashcardContainer.offsetWidth * 0.22);
+  const shouldClassify = Math.abs(dx) >= threshold || (Math.abs(dx) >= 35 && velocity >= 0.4);
+
+  if (shouldClassify) {
+    classify(dx > 0 ? "mastered" : "learning");
+  } else {
+    resetDrag();
+  }
 }
 
 function submitWriting(event) {
@@ -725,6 +803,10 @@ elements.revealButton.addEventListener("click", () => {
 elements.writingForm.addEventListener("submit", submitWriting);
 elements.retryWritingButton.addEventListener("click", retryWriting);
 elements.flashcardContainer.addEventListener("pointerdown", onPointerDown);
+elements.flashcardContainer.addEventListener("touchstart", onTouchStart, { passive: true });
+window.addEventListener("touchmove", onTouchMove, { passive: false });
+window.addEventListener("touchend", onTouchEnd, { passive: false });
+window.addEventListener("touchcancel", onTouchEnd, { passive: false });
 window.addEventListener("pointermove", onPointerMove);
 window.addEventListener("pointerup", onPointerUp);
 window.addEventListener("pointercancel", onPointerUp);
