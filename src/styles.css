@@ -1643,3 +1643,107 @@ body.in-study { overflow:hidden; overscroll-behavior:none; }
   .topic-icon { width:32px; height:32px; }
   .topic-copy strong { font-size:11px; }
 }
+
+
+/* Respostas escritas: feedback de acerto/erro mantendo a ação no cartão. */
+#checkAnswerButton.is-correct {
+  background: #10b981;
+  border-color: #059669;
+  color: #052e24;
+  box-shadow: 0 4px 18px #10b98145;
+}
+#checkAnswerButton.is-incorrect {
+  background: #fb7185;
+  border-color: #e11d48;
+  color: #4c0519;
+  box-shadow: 0 4px 18px #fb718540;
+}
+#checkAnswerButton:disabled {
+  cursor: default;
+  opacity: 1;
+}
+.writing-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+.writing-feedback-correct {
+  color: #065f46;
+  background: #d1fae5;
+  border-color: #6ee7b7;
+}
+.writing-feedback-incorrect {
+  color: #881337;
+  background: #ffe4e6;
+  border-color: #fda4af;
+}
+.writing-correct-answer {
+  color: #4c0519;
+  font-size: 12px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 767px) {
+  /* O segundo cartão permanece visível acima do teclado virtual. */
+  .study-screen.keyboard-open {
+    position: fixed;
+    z-index: 30;
+    inset: auto 0 auto 0;
+    top: var(--study-offset-top, 0px);
+    height: var(--study-visible-height, 100dvh);
+    overflow: hidden;
+  }
+  .study-screen.keyboard-open .study-stage {
+    height: 100%;
+    min-height: 0;
+    padding: max(42px, env(safe-area-inset-top)) 12px 8px;
+    align-items: center;
+    justify-content: center;
+  }
+  .study-screen.keyboard-open .study-card-shell,
+  .study-screen.keyboard-open .study-card-shell.is-expanded {
+    width: min(100%, 392px);
+    max-width: 392px;
+    height: min(100%, 340px);
+    max-height: 100%;
+    overflow: hidden;
+  }
+  .study-screen.keyboard-open .card-grid,
+  .study-screen.keyboard-open .card-grid.is-revealed {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 0;
+  }
+  .study-screen.keyboard-open .card-grid > .card-surface {
+    display: none;
+  }
+  .study-screen.keyboard-open .back-panel {
+    display: grid;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    opacity: 1;
+    transform: none;
+    overflow: auto;
+  }
+  .study-screen.keyboard-open .back-panel > article {
+    min-height: 0;
+    height: 100%;
+    padding: 11px 14px;
+  }
+  .study-screen.keyboard-open #writingForm {
+    gap: 9px;
+  }
+  .study-screen.keyboard-open #writingInput {
+    font-size: 16px;
+  }
+}
