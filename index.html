@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <meta name="description" content="Estude inglês com flashcards de chunks, escrita e revisão por gestos.">
+  <title>English Chunks — Flashcards</title>
+  <link rel="stylesheet" href="./src/styles.css">
+  <script type="module" src="./src/app.js"></script>
+</head>
+<body class="min-h-screen bg-[#050505] font-sans text-[#efefef] antialiased selection:bg-[#ded9ca] selection:text-[#252525]">
+  <main id="homeScreen" class="screen mx-auto min-h-screen w-full max-w-[940px] px-4 pb-16 pt-10 sm:px-7 sm:pt-14">
+    <header class="mb-9">
+      <p class="mb-2 text-[10px] font-semibold uppercase tracking-[.23em] text-[#858585]">English learning / chunks</p>
+      <h1 class="text-[28px] font-semibold tracking-tight sm:text-[34px]">Meus flashcards</h1>
+      <p class="mt-2 text-sm text-[#929292]">Escolha seu modo e continue exatamente de onde parou.</p>
+    </header>
+
+    <section class="mb-8 rounded-2xl border border-[#242424] bg-[#0c0c0c] p-5 sm:p-6" aria-label="Resumo dos estudos">
+      <div class="mb-5 flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-base font-semibold">Seu progresso</h2>
+        <span id="overallCaption" class="text-xs text-[#aaa]">90 chunks em cada modo</span>
+      </div>
+      <div class="grid grid-cols-2 gap-3 sm:gap-5">
+        <div class="summary-tile">
+          <p class="summary-kicker">Leitura em inglês</p>
+          <p id="homeRecognitionPercent" class="summary-number">0%</p>
+          <div class="summary-track"><div id="homeRecognitionBar" class="summary-bar"></div></div>
+          <p id="homeRecognitionStats" class="summary-detail">0 dominados</p>
+        </div>
+        <div class="summary-tile">
+          <p class="summary-kicker">Tradução escrita</p>
+          <p id="homeWritingPercent" class="summary-number">0%</p>
+          <div class="summary-track"><div id="homeWritingBar" class="summary-bar"></div></div>
+          <p id="homeWritingStats" class="summary-detail">0 dominados</p>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="mb-4 text-base font-semibold">Como você quer estudar?</h2>
+    <section class="grid gap-4 md:grid-cols-2" aria-label="Modos de estudo">
+      <button type="button" data-start="recognition" class="mode-tile group text-left">
+        <span class="mode-kicker">01 / RECONHECIMENTO</span>
+        <span class="mode-title">Flashcards em inglês</span>
+        <span class="mode-description">Leia o chunk em inglês, toque para ver a tradução e deslize para classificar.</span>
+        <span class="mode-preview">I'm working on...</span>
+        <span class="mode-footer"><span id="recognitionResume">Iniciar estudos</span><span aria-hidden="true">↗</span></span>
+      </button>
+      <button type="button" data-start="writing" class="mode-tile group text-left">
+        <span class="mode-kicker">02 / PRODUÇÃO</span>
+        <span class="mode-title">Tradução escrita</span>
+        <span class="mode-description">Leia em português, abra o segundo cartão e digite a tradução em inglês.</span>
+        <span class="mode-preview">Estou trabalhando em...</span>
+        <span class="mode-footer"><span id="writingResume">Iniciar estudos</span><span aria-hidden="true">↗</span></span>
+      </button>
+    </section>
+
+    <button id="openLibrary" type="button" class="mt-6 flex w-full items-center justify-between rounded-2xl border border-[#282828] bg-[#0c0c0c] px-5 py-5 text-left text-sm text-[#e5e5e5] transition hover:border-[#777] hover:bg-[#151515]">
+      <span><strong class="block font-semibold">Minha biblioteca</strong><span class="mt-1 block text-xs text-[#999]">Ver dominados, não dominados, filtrar e reclassificar.</span></span>
+      <span class="text-xl text-[#aaa]" aria-hidden="true">↗</span>
+    </button>
+    <p class="mt-6 text-center text-[11px] leading-relaxed text-[#777]">No estudo: toque para abrir · deslize para a esquerda para revisar · direita para dominar.<br>Teclado: ← / → para classificar · espaço para abrir · ↓ para pular.</p>
+  </main>
+
+  <main id="studyScreen" hidden class="screen study-screen">
+    <button id="studyBack" type="button" class="back-link" aria-label="Voltar para a tela inicial"><span aria-hidden="true">←</span> Voltar</button>
+    <section class="study-stage" aria-label="Cartão de estudo">
+      <div id="studyEmpty" hidden class="empty-card">
+        <h2>Trilha concluída</h2>
+        <p>Não há chunks disponíveis neste filtro.</p>
+        <button id="emptyBack" type="button">Voltar ao início</button>
+      </div>
+      <div id="flashcardContainer" class="card-shell study-card-shell">
+        <div id="flashcardGrid" class="card-grid grid transition-[grid-template-columns,grid-template-rows,gap] duration-500 ease-[cubic-bezier(.22,1,.36,1)] md:duration-700">
+          <button id="revealButton" type="button" aria-controls="answerPanel" aria-expanded="false" class="card-surface group relative flex aspect-[365/445] min-h-0 min-w-0 w-full cursor-pointer flex-col justify-between overflow-hidden rounded-[13px] bg-[#f0ede4] px-4 py-5 text-[#282828] outline-none transition-colors duration-300 hover:bg-[#f5f2e9] focus-visible:ring-2 focus-visible:ring-[#e9dbc0] focus-visible:ring-offset-4 focus-visible:ring-offset-[#090909]">
+            <span class="flex w-full items-start justify-between gap-3">
+              <span id="frontLanguage" class="text-left text-[10px] font-medium uppercase tracking-[.01em] text-[#656565]">English</span>
+              <svg aria-hidden="true" class="h-[15px] w-[15px] shrink-0 text-[#505050]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.5a8.5 8.5 0 0 0-8-2V19a8.5 8.5 0 0 1 8 2m0-13.5a8.5 8.5 0 0 1 8-2V19a8.5 8.5 0 0 0-8 2m0-13.5V21"/></svg>
+            </span>
+            <span id="frontText" class="block max-w-full break-words px-1 text-center text-[22px] font-medium tracking-[-.035em] sm:text-[25px]">I had to...</span>
+            <span id="frontTense" class="block text-center text-[9px] font-medium uppercase tracking-[.06em] text-[#656565]">Past</span>
+            <span id="swipeHintLeft" aria-hidden="true" class="pointer-events-none absolute left-4 top-[48%] -translate-y-1/2 rounded-lg border-2 border-[#bd877d] bg-[#f0ede4]/90 px-3 py-1.5 text-[13px] font-bold uppercase tracking-wide text-[#aa685d] opacity-0">Não domino</span>
+            <span id="swipeHintRight" aria-hidden="true" class="pointer-events-none absolute right-4 top-[48%] -translate-y-1/2 rounded-lg border-2 border-[#7e9766] bg-[#f0ede4]/90 px-3 py-1.5 text-[13px] font-bold uppercase tracking-wide text-[#64804b] opacity-0">Dominado</span>
+          </button>
+          <div id="answerPanel" aria-hidden="true" inert class="back-panel grid min-h-0 grid-rows-[1fr] opacity-0 translate-y-3 transition-[opacity,transform] duration-500 ease-out md:translate-x-3 md:translate-y-0">
+            <article class="flex min-h-0 w-full flex-col justify-between rounded-[13px] bg-[#f0ede4] px-4 py-5 text-[#282828]">
+              <span id="backHeading" class="text-[10px] font-medium uppercase tracking-[.01em] text-[#656565]">Tradução + exemplo</span>
+              <div id="readingAnswerContent" class="flex flex-col items-center justify-center gap-6 text-center">
+                <p id="translationText" class="text-[17px] font-medium tracking-tight">Eu tive que...</p>
+                <div class="w-full border-t border-[#e0dcd1]"></div>
+                <div class="space-y-3 px-1">
+                  <p id="exampleText" class="text-[14px] leading-relaxed text-[#383838]">I had to finish the project yesterday.</p>
+                  <p id="exampleTranslation" class="text-[12px] leading-relaxed text-[#777]">Eu tive que terminar o projeto ontem.</p>
+                </div>
+              </div>
+              <form id="writingForm" hidden class="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-6 px-2 text-center" autocomplete="off">
+                <div class="w-full">
+                  <label for="writingInput" class="mb-3 block text-[12px] font-medium text-[#656565]">Traduza para o inglês</label>
+                  <input id="writingInput" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="180" placeholder="Digite aqui" class="writing-underline w-full border-0 bg-transparent px-2 py-3 text-center text-[18px] font-medium text-[#282828] placeholder:text-[#98938a] outline-none transition duration-300">
+                </div>
+                <button id="checkAnswerButton" type="submit" class="rounded-xl border border-[#414141] bg-[#090909] px-5 py-3.5 text-[13px] font-semibold tracking-wide text-[#f5f5f5] transition duration-300 hover:bg-[#161616]">ENVIAR</button>
+                <div id="writingResult" hidden role="status" aria-live="polite" class="w-full rounded-xl border px-4 py-3 text-sm font-medium"></div>
+                <button type="button" id="retryWritingButton" hidden class="text-[12px] font-medium text-[#656565] underline underline-offset-4 transition hover:text-[#282828]">Tentar novamente</button>
+              </form>
+              <span id="backTense" class="text-center text-[9px] font-medium uppercase tracking-[.06em] text-[#656565]">Past</span>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <main id="libraryScreen" hidden class="screen mx-auto min-h-screen w-full max-w-[940px] px-4 pb-16 pt-8 sm:px-7 sm:pt-12">
+    <button id="libraryBack" type="button" class="back-link back-link-flow"><span aria-hidden="true">←</span> Voltar</button>
+    <header class="mb-7">
+      <p class="mb-2 text-[10px] font-semibold uppercase tracking-[.23em] text-[#858585]">Acompanhamento</p>
+      <h1 class="text-[26px] font-semibold tracking-tight sm:text-[32px]">Minha biblioteca</h1>
+      <p class="mt-2 text-xs text-[#999]">Veja seus chunks e altere o domínio quando precisar.</p>
+    </header>
+    <section class="rounded-2xl border border-[#242424] bg-[#0c0c0c] p-4 sm:p-5">
+      <div class="library-filters">
+        <label>Modo
+          <select id="libraryMode"><option value="recognition">Leitura</option><option value="writing">Escrita</option></select>
+        </label>
+        <label>Situação
+          <select id="libraryStatus"><option value="all">Todos</option><option value="mastered">Dominados</option><option value="learning">Não dominados</option><option value="new">Não avaliados</option></select>
+        </label>
+        <label>Tempo verbal
+          <select id="libraryTense"><option value="all">Todos</option><option value="present">Presente</option><option value="past">Passado</option><option value="future">Futuro</option></select>
+        </label>
+      </div>
+      <label for="librarySearch" class="sr-only">Pesquisar chunks</label>
+      <input id="librarySearch" type="search" placeholder="Pesquisar em inglês ou português..." class="mt-4 w-full rounded-xl border border-[#333] bg-[#121212] px-4 py-3 text-sm text-[#f3f3f3] placeholder:text-[#777] outline-none transition focus:border-[#999]">
+      <p id="libraryCount" class="mt-4 text-xs text-[#999]">90 chunks</p>
+      <div id="libraryList" class="mt-3 space-y-2"></div>
+      <p id="libraryEmpty" hidden class="py-8 text-center text-sm text-[#888]">Nenhum chunk encontrado.</p>
+    </section>
+    <section class="mt-5 rounded-2xl border border-[#242424] bg-[#0c0c0c] p-4 sm:p-5">
+      <h2 class="text-sm font-semibold">Backup do progresso</h2>
+      <p class="mt-2 text-xs leading-relaxed text-[#999]">Exporte os dados para continuar em outro navegador ou domínio. A importação substitui os dados locais deste navegador.</p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button id="exportProgress" type="button" class="utility-button">Exportar JSON</button>
+        <label class="utility-button cursor-pointer">Importar JSON<input id="importProgress" type="file" accept=".json,application/json" hidden></label>
+      </div>
+      <p id="backupFeedback" role="status" aria-live="polite" class="mt-3 text-xs text-[#aaa]"></p>
+    </section>
+  </main>
+</body>
+</html>
