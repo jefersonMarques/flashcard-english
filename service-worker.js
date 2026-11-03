@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "english-chunks-static-";
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v5";
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 
 const OFFLINE_ASSETS = [
