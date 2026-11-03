@@ -1,4 +1,6 @@
 import { chunks } from "./chunks.js";
+import { topics } from "./topics.js";
+import { createIcon } from "./icons.js";
 import { evaluateAnswer } from "./answer.js";
 import {
   STORAGE_KEYS,
@@ -26,7 +28,8 @@ const elements = Object.fromEntries(
     "checkAnswerButton", "writingResult", "retryWritingButton",
     "libraryMode", "libraryStatus", "libraryTense", "librarySearch",
     "libraryCount", "libraryList", "libraryEmpty", "exportProgress",
-    "importProgress", "backupFeedback", "swipeTutorial", "dismissSwipeTutorial"
+    "importProgress", "backupFeedback", "swipeTutorial", "dismissSwipeTutorial",
+    "topicList", "topicSelectionCount", "selectedTopicCaption", "libraryTopic"
   ].map((id) => [id, document.getElementById(id)])
 );
 
@@ -36,6 +39,7 @@ const state = {
   mode: "recognition",
   filter: "study",
   tense: "all",
+  topic: "all",
   index: 0,
   revealed: false,
   transitioning: false,
@@ -55,11 +59,23 @@ function statusOf(chunk, mode = state.mode) {
 
 function getViewKey() {
   const key = `${state.filter}:${state.tense}`;
-  return state.mode === "writing" ? `writing:${key}` : key;
+  const modeKey = state.mode === "writing" ? `writing:${key}` : key;
+  return state.topic === "all" ? modeKey : `topic:${state.topic}:${modeKey}`;
+}
+
+function matchesTopic(chunk, topic = state.topic) {
+  if (topic === "all") return true;
+  if (topic === "grammar") return !chunk.topic;
+  return chunk.topic === topic;
+}
+
+function selectedTopic() {
+  return topics.find((topic) => topic.id === state.topic);
 }
 
 function filteredChunks() {
   return chunks.filter((chunk) => {
+    if (!matchesTopic(chunk)) return false;
     if (state.tense !== "all" && state.tense !== chunk.tense) {
       return false;
     }
@@ -106,6 +122,7 @@ function saveNavigation() {
   }
 
   state.navigation.mode = state.mode;
+  state.navigation.topics[state.mode] = state.topic;
   state.navigation.filter = state.filter;
   state.navigation.tense = state.tense;
   state.navigation.selections[state.mode] = {
@@ -130,6 +147,7 @@ function getCounts(mode) {
 }
 
 function renderHome() {
+  renderTopicSelection();
   for (const mode of ["recognition", "writing"]) {
     const counts = getCounts(mode);
     const label = mode === "recognition" ? "Recognition" : "Writing";
@@ -137,10 +155,14 @@ function renderHome() {
     elements[`home${label}Bar`].style.width = `${counts.percent}%`;
     elements[`home${label}Stats`].textContent = `${counts.mastered} dominados · ${counts.learning} em revisão · ${counts.fresh} novos`;
 
-    const savedId = state.navigation.positions[mode === "writing" ? "writing:study:all" : "study:all"];
-    const resumeIndex = findResumeIndex(chunks, savedId);
+    const topic = state.navigation.topics[mode] || "all";
+    const suffix = mode === "writing" ? "writing:study:all" : "study:all";
+    const positionKey = topic === "all" ? suffix : `topic:${topic}:${suffix}`;
+    const savedId = state.navigation.positions[positionKey];
+    const topicCards = chunks.filter((chunk) => matchesTopic(chunk, topic));
+    const resumeIndex = findResumeIndex(topicCards, savedId);
     elements[`${mode}Resume`].textContent = savedId
-      ? `Continuar estudo · ${resumeIndex + 1} / ${chunks.length}`
+      ? `Continuar estudo · ${resumeIndex + 1} / ${topicCards.length}`
       : "Começar estudo";
   }
   elements.overallCaption.textContent = `${chunks.length} chunks em cada modo`;
@@ -255,6 +277,7 @@ function route() {
       if (!state.enteringFromLibrary) {
         state.filter = "study";
         state.tense = "all";
+        state.topic = state.navigation.topics[requestedMode] || "all";
         restorePosition();
       }
     }
@@ -274,6 +297,7 @@ function startMode(mode) {
   requestImmersiveMode();
   state.mode = mode;
   state.filter = "study";
+  state.navigation.topics[mode] = state.topic;
   state.tense = "all";
   restorePosition();
   saveNavigation();
@@ -310,7 +334,7 @@ function classify(status) {
   const nextId = before[(state.index + 1) % before.length]?.id;
   const previousStatus = activeProgress()[card.id] || null;
   state.transitioning = true;
-  state.history.push({ cardId: card.id, previousStatus, mode: state.mode, filter: state.filter, tense: state.tense });
+  state.history.push({ cardId: card.id, previousStatus, mode: state.mode, filter: state.filter, tense: state.tense, topic: state.topic });
   const container = elements.flashcardContainer;
   const startTransform = getComputedStyle(container).transform;
   const startOpacity = Number(getComputedStyle(container).opacity);
@@ -357,6 +381,7 @@ function undoClassification() {
   state.mode = previous.mode;
   state.filter = previous.filter;
   state.tense = previous.tense;
+  state.topic = previous.topic || "all";
   if (previous.previousStatus === null) {
     delete activeProgress()[previous.cardId];
   } else {
@@ -510,6 +535,7 @@ function renderLibrary() {
   const mode = elements.libraryMode.value;
   const filter = elements.libraryStatus.value;
   const tense = elements.libraryTense.value;
+  const topic = elements.libraryTopic.value;
   const search = elements.librarySearch.value.trim().toLocaleLowerCase("pt-BR");
   const filtered = chunks.filter((chunk) => {
     const status = statusOf(chunk, mode);
@@ -517,7 +543,7 @@ function renderLibrary() {
     const matchesTense = tense === "all" || chunk.tense === tense;
     const matchesSearch = [chunk.front, chunk.translation, chunk.example, chunk.exampleTranslation]
       .some((value) => value.toLocaleLowerCase("pt-BR").includes(search));
-    return matchesStatus && matchesTense && matchesSearch;
+    return matchesStatus && matchesTense && matchesSearch && matchesTopic(chunk, topic);
   });
 
   elements.libraryCount.textContent = `${filtered.length} de ${chunks.length} chunks`;
@@ -529,7 +555,8 @@ function openLibraryCard(chunk) {
   state.mode = elements.libraryMode.value;
   state.filter = "all";
   state.tense = "all";
-  state.index = chunks.findIndex((item) => item.id === chunk.id);
+  state.topic = chunk.topic || "grammar";
+  state.index = chunks.filter((item) => matchesTopic(item)).findIndex((item) => item.id === chunk.id);
   state.enteringFromLibrary = true;
   saveNavigation();
   location.hash = `study/${state.mode}`;
@@ -637,7 +664,13 @@ window.addEventListener("pointerup", onPointerUp);
 window.addEventListener("pointercancel", onPointerUp);
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("hashchange", route);
-for (const id of ["libraryMode", "libraryStatus", "libraryTense", "librarySearch"]) {
+for (const topic of topics) {
+  const option = document.createElement("option");
+  option.value = topic.id;
+  option.textContent = topic.title;
+  elements.libraryTopic.append(option);
+}
+for (const id of ["libraryTopic", "libraryMode", "libraryStatus", "libraryTense", "librarySearch"]) {
   elements[id].addEventListener(id === "librarySearch" ? "input" : "change", renderLibrary);
 }
 elements.exportProgress.addEventListener("click", exportProgress);
