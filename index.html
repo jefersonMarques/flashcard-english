@@ -4,10 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#050505">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="English Chunks">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <meta name="description" content="Estude inglês com flashcards de chunks, escrita e revisão por gestos.">
   <title>English Chunks — Flashcards</title>
   <link rel="stylesheet" href="./src/styles.css">
   <script type="module" src="./src/app.js"></script>
+  <script type="module" src="./src/pwa.js"></script>
 </head>
 <body class="min-h-screen bg-[#050505] font-sans text-[#efefef] antialiased selection:bg-[#ded9ca] selection:text-[#252525]">
   <main id="homeScreen" class="screen mx-auto min-h-screen w-full max-w-[940px] px-4 pb-16 pt-10 sm:px-7 sm:pt-14">
@@ -38,6 +45,8 @@
       </div>
     </section>
 
+    <button id="installAppButton" hidden type="button" class="mb-6 w-full rounded-xl border border-[#a6b799] bg-[#1b2419] px-5 py-4 text-left text-sm font-semibold text-[#eaf1e5] transition hover:bg-[#263323]">Instalar English Chunks neste dispositivo ↗</button>
+    <p id="installHelp" hidden class="mb-6 rounded-xl border border-[#303030] p-4 text-xs leading-relaxed text-[#aaa]">Para instalar no iPhone ou iPad, abra no Safari, toque em Compartilhar e selecione “Adicionar à Tela de Início”.</p>
     <h2 class="mb-4 text-base font-semibold">Como você quer estudar?</h2>
     <section class="grid gap-4 md:grid-cols-2" aria-label="Modos de estudo">
       <button type="button" data-start="recognition" class="mode-tile group text-left">
