@@ -245,14 +245,14 @@ function renderStudy() {
   const isWriting = state.mode === "writing";
   elements.frontLanguage.textContent = isWriting ? "Português · toque para responder" : "English";
   elements.frontText.textContent = isWriting ? chunk.translation : chunk.front;
-  elements.frontTense.textContent = tenseLabels[chunk.tense];
+  elements.frontTense.textContent = chunk.topic ? topics.find((topic) => topic.id === chunk.topic)?.title || "Conversation" : tenseLabels[chunk.tense];
   elements.backHeading.textContent = isWriting ? "Sua resposta em inglês" : "Tradução + exemplo";
   elements.readingAnswerContent.hidden = isWriting;
   elements.writingForm.hidden = !isWriting;
   elements.translationText.textContent = chunk.translation;
   elements.exampleText.textContent = chunk.example;
   elements.exampleTranslation.textContent = chunk.exampleTranslation;
-  elements.backTense.textContent = tenseLabels[chunk.tense];
+  elements.backTense.textContent = elements.frontTense.textContent;
   resetWritingForm();
 }
 
@@ -543,7 +543,7 @@ function buildLibraryRow(chunk) {
   const translation = document.createElement("span");
   translation.textContent = chunk.translation;
   const info = document.createElement("small");
-  info.textContent = `${tenseLabels[chunk.tense]} · ${statusLabels[status]}`;
+  info.textContent = `${chunk.topic ? topics.find((topic) => topic.id === chunk.topic)?.title || "Conversação" : tenseLabels[chunk.tense]} · ${statusLabels[status]}`;
   text.append(title, translation, info);
 
   const actions = document.createElement("div");
