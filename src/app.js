@@ -146,6 +146,45 @@ function getCounts(mode) {
   return { mastered, learning, fresh, percent: Math.round(mastered / chunks.length * 100) };
 }
 
+function renderTopicSelection() {
+  const choices = [{ id: "all", title: "Todos os assuntos", icon: "layers" }, ...topics];
+  const buttons = choices.map((topic) => {
+    const count = chunks.filter((chunk) => matchesTopic(chunk, topic.id)).length;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "topic-tile";
+    button.classList.toggle("is-active", state.topic === topic.id);
+    button.setAttribute("aria-pressed", String(state.topic === topic.id));
+
+    const symbol = document.createElement("span");
+    symbol.className = "topic-icon";
+    symbol.append(createIcon(topic.icon, 22));
+
+    const copy = document.createElement("span");
+    copy.className = "topic-copy";
+    const title = document.createElement("strong");
+    title.textContent = topic.title;
+    const subtitle = document.createElement("small");
+    subtitle.textContent = `${count} chunks`;
+    copy.append(title, subtitle);
+    button.append(symbol, copy);
+
+    button.addEventListener("click", () => {
+      state.topic = topic.id;
+      state.navigation.topics.recognition = topic.id;
+      state.navigation.topics.writing = topic.id;
+      writeJson(STORAGE_KEYS.navigation, state.navigation);
+      renderHome();
+    });
+    return button;
+  });
+
+  elements.topicList.replaceChildren(...buttons);
+  const count = chunks.filter((chunk) => matchesTopic(chunk)).length;
+  elements.topicSelectionCount.textContent = `${count} expressões`;
+  elements.selectedTopicCaption.textContent = selectedTopic()?.title || "Todos os assuntos";
+}
+
 function renderHome() {
   renderTopicSelection();
   for (const mode of ["recognition", "writing"]) {
