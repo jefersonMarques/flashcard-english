@@ -26,7 +26,7 @@ const elements = Object.fromEntries(
     "checkAnswerButton", "writingResult", "retryWritingButton",
     "libraryMode", "libraryStatus", "libraryTense", "librarySearch",
     "libraryCount", "libraryList", "libraryEmpty", "exportProgress",
-    "importProgress", "backupFeedback"
+    "importProgress", "backupFeedback", "swipeTutorial", "dismissSwipeTutorial"
   ].map((id) => [id, document.getElementById(id)])
 );
 
@@ -41,7 +41,8 @@ const state = {
   transitioning: false,
   pointer: null,
   suppressClick: false,
-  history: []
+  history: [],
+  swipeTutorialSeen: localStorage.getItem("englishChunks:swipeTutorial:v1") === "seen"
 };
 
 function activeProgress() {
@@ -194,17 +195,52 @@ function renderStudy() {
   resetWritingForm();
 }
 
+function dismissSwipeTutorial() {
+  elements.swipeTutorial.hidden = true;
+  state.swipeTutorialSeen = true;
+  try {
+    localStorage.setItem("englishChunks:swipeTutorial:v1", "seen");
+  } catch {
+    // A persistência da orientação é opcional.
+  }
+}
+
+function showSwipeTutorial() {
+  if (!state.swipeTutorialSeen) {
+    elements.swipeTutorial.hidden = false;
+    elements.dismissSwipeTutorial.focus();
+  }
+}
+
+function requestImmersiveMode() {
+  if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+  }
+}
+
+function leaveImmersiveMode() {
+  if (document.fullscreenElement && document.exitFullscreen) {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
 function showScreen(name) {
   state.screen = name;
   elements.homeScreen.hidden = name !== "home";
   elements.studyScreen.hidden = name !== "study";
   elements.libraryScreen.hidden = name !== "library";
+  document.body.classList.toggle("in-study", name === "study");
+  if (name !== "study") {
+    elements.swipeTutorial.hidden = true;
+    leaveImmersiveMode();
+  }
   window.scrollTo({ top: 0, behavior: "instant" });
 
   if (name === "home") {
     renderHome();
   } else if (name === "study") {
     renderStudy();
+    showSwipeTutorial();
   } else {
     renderLibrary();
   }
@@ -235,6 +271,7 @@ function startMode(mode) {
   if (state.transitioning) {
     return;
   }
+  requestImmersiveMode();
   state.mode = mode;
   state.filter = "study";
   state.tense = "all";
@@ -333,6 +370,11 @@ function onPointerDown(event) {
     return;
   }
   state.pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false, dx: 0 };
+  try {
+    elements.flashcardContainer.setPointerCapture(event.pointerId);
+  } catch {
+    // A captura é opcional conforme o navegador.
+  }
 }
 
 function onPointerMove(event) {
@@ -349,6 +391,9 @@ function onPointerMove(event) {
 
   pointer.moved = true;
   pointer.dx = dx;
+  if (event.cancelable) {
+    event.preventDefault();
+  }
   elements.flashcardContainer.classList.remove("is-settling", "is-entering");
   elements.flashcardContainer.classList.add("is-dragging");
   elements.flashcardContainer.style.transform = `translate3d(${dx}px, 0, 0) rotate(${dx / 28}deg)`;
@@ -363,6 +408,9 @@ function onPointerUp(event) {
     return;
   }
   state.pointer = null;
+  if (elements.flashcardContainer.hasPointerCapture?.(event.pointerId)) {
+    elements.flashcardContainer.releasePointerCapture(event.pointerId);
+  }
   if (!pointer.moved) {
     return;
   }
@@ -523,7 +571,7 @@ async function importProgress(event) {
 }
 
 function onKeyDown(event) {
-  if (state.screen !== "study" || state.transitioning) {
+  if (state.screen !== "study" || state.transitioning || !elements.swipeTutorial.hidden) {
     return;
   }
   const target = event.target;
@@ -558,6 +606,7 @@ for (const button of document.querySelectorAll("[data-start]")) {
 }
 
 elements.openLibrary.addEventListener("click", () => { location.hash = "library"; });
+elements.dismissSwipeTutorial.addEventListener("click", dismissSwipeTutorial);
 elements.studyBack.addEventListener("click", () => { location.hash = "home"; });
 elements.emptyBack.addEventListener("click", () => { location.hash = "home"; });
 elements.libraryBack.addEventListener("click", () => { location.hash = "home"; });
