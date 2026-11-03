@@ -2075,3 +2075,54 @@ body.in-study { overflow:hidden; overscroll-behavior:none; }
   border-bottom-color: #fb7185;
   -webkit-text-fill-color: #be123c;
 }
+
+
+/* Badge breve de resultado, sem deslocar os controles do cartão. */
+.answer-card-writing .writing-face-content {
+  position: relative;
+}
+.answer-card-writing .writing-status-badge {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 0;
+  max-width: calc(100% - 32px);
+  padding: 7px 13px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .045em;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  box-shadow: 0 5px 18px #00000014;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.answer-card-writing .writing-status-badge.is-correct {
+  background: #d1fae5;
+  border-color: #6ee7b7;
+  color: #047857;
+}
+.answer-card-writing .writing-status-badge.is-incorrect {
+  background: #ffe4e6;
+  border-color: #fda4af;
+  color: #be123c;
+}
+.answer-card-writing .writing-status-badge.is-fading {
+  opacity: 0;
+  transform: translate(-50%, -65%) scale(.94);
+}
+.answer-card-writing .writing-status-badge[hidden] {
+  display: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .answer-card-writing .writing-status-badge { transition: none; }
+}
