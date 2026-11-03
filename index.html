@@ -20,8 +20,8 @@
   <main id="homeScreen" class="screen home-screen mx-auto min-h-screen w-full max-w-[940px] px-4 pb-16 pt-10 sm:px-7 sm:pt-14">
     <header class="mb-9">
       <p class="mb-2 text-[10px] font-semibold uppercase tracking-[.23em] text-[#858585]">English learning / chunks</p>
-      <h1 class="home-title">Aprenda inglês.<span>Um chunk de cada vez.</span></h1>
-      <p class="home-subtitle">Pratique todos os dias e continue exatamente de onde parou.</p>
+      <h1 class="home-title">Inglês que você <span>usa de verdade.</span></h1>
+      <p class="home-subtitle">Escolha um assunto, pratique expressões reais e acompanhe sua evolução. Um cartão de cada vez.</p>
     </header>
 
     <section class="mb-8 rounded-2xl border border-[#242424] bg-[#0c0c0c] p-5 sm:p-6" aria-label="Resumo dos estudos">
@@ -46,7 +46,17 @@
     </section>
 
     
-    <h2 class="home-section-title mb-4 text-base font-semibold">Escolha seu modo de estudo</h2>
+    <section class="topics-section" aria-labelledby="topicsTitle">
+      <div class="section-heading">
+        <div><p class="section-eyebrow">PASSO 01</p><h2 id="topicsTitle" class="home-section-title">O que vamos aprender?</h2></div>
+        <span id="topicSelectionCount" class="section-meta">170 expressões</span>
+      </div>
+      <div id="topicList" class="topic-grid" role="group" aria-label="Selecione um assunto"></div>
+    </section>
+    <div class="section-heading modes-heading">
+      <div><p class="section-eyebrow">PASSO 02</p><h2 class="home-section-title">Como prefere praticar?</h2></div>
+      <span id="selectedTopicCaption" class="section-meta">Todos os assuntos</span>
+    </div>
     <section class="grid gap-4 md:grid-cols-2" aria-label="Modos de estudo">
       <button type="button" data-start="recognition" class="mode-tile group text-left">
         <span class="mode-kicker">01 / RECONHECIMENTO</span>
@@ -68,7 +78,7 @@
       <span><strong class="block font-semibold">Minha biblioteca</strong><span class="mt-1 block text-xs text-[#999]">Ver dominados, não dominados, filtrar e reclassificar.</span></span>
       <span class="text-xl text-[#aaa]" aria-hidden="true">↗</span>
     </button>
-    <p class="mt-6 text-center text-[11px] leading-relaxed text-[#777]">Toque para revelar · Arraste para classificar · Seu progresso fica salvo.</p>
+    <p class="home-footnote mt-6 text-center text-[11px] leading-relaxed text-[#777]">Um pouco todos os dias faz diferença. Seu progresso é salvo neste dispositivo.</p>
     <button id="installAppButton" hidden type="button" class="install-float" aria-label="Instalar English Chunks"><span aria-hidden="true">↓</span> Instalar English Chunks <span aria-hidden="true">↗</span></button>
     <p id="installHelp" hidden class="install-help">No iPhone, abra no Safari, toque em Compartilhar e escolha “Adicionar à Tela de Início”.</p>
   </main>
@@ -140,6 +150,9 @@
     </header>
     <section class="rounded-2xl border border-[#242424] bg-[#0c0c0c] p-4 sm:p-5">
       <div class="library-filters">
+        <label>Assunto
+          <select id="libraryTopic"><option value="all">Todos os assuntos</option></select>
+        </label>
         <label>Modo
           <select id="libraryMode"><option value="recognition">Leitura</option><option value="writing">Escrita</option></select>
         </label>
