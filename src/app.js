@@ -238,6 +238,7 @@ function resetWritingForm() {
   elements.checkAnswerButton.classList.remove("is-correct", "is-incorrect");
   elements.retryWritingButton.hidden = true;
   elements.revealCorrectButton.hidden = true;
+  elements.revealCorrectButton.disabled = false;
   elements.writingFlipStage.classList.remove("is-flipped");
   elements.writingCorrectFace.setAttribute("aria-hidden", "true");
   elements.writingCorrectFace.setAttribute("inert", "");
@@ -688,7 +689,7 @@ function revealCorrectAnswer() {
     || state.mode !== "writing"
     || state.screen !== "study"
     || lastAttempt?.correct !== false
-    || !elements.writingFlipStage.classList.contains("is-flipped") && elements.revealCorrectButton.hidden
+    || elements.revealCorrectButton.hidden
   ) {
     return;
   }
