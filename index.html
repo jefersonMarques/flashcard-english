@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#050505">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,11 +17,11 @@
   <script type="module" src="./src/pwa.js"></script>
 </head>
 <body class="min-h-screen bg-[#050505] font-sans text-[#efefef] antialiased selection:bg-[#ded9ca] selection:text-[#252525]">
-  <main id="homeScreen" class="screen mx-auto min-h-screen w-full max-w-[940px] px-4 pb-16 pt-10 sm:px-7 sm:pt-14">
+  <main id="homeScreen" class="screen home-screen mx-auto min-h-screen w-full max-w-[940px] px-4 pb-16 pt-10 sm:px-7 sm:pt-14">
     <header class="mb-9">
       <p class="mb-2 text-[10px] font-semibold uppercase tracking-[.23em] text-[#858585]">English learning / chunks</p>
-      <h1 class="text-[28px] font-semibold tracking-tight sm:text-[34px]">Meus flashcards</h1>
-      <p class="mt-2 text-sm text-[#929292]">Escolha seu modo e continue exatamente de onde parou.</p>
+      <h1 class="home-title">Aprenda inglês.<span>Um chunk de cada vez.</span></h1>
+      <p class="home-subtitle">Pratique todos os dias e continue exatamente de onde parou.</p>
     </header>
 
     <section class="mb-8 rounded-2xl border border-[#242424] bg-[#0c0c0c] p-5 sm:p-6" aria-label="Resumo dos estudos">
@@ -45,9 +45,8 @@
       </div>
     </section>
 
-    <button id="installAppButton" hidden type="button" class="mb-6 w-full rounded-xl border border-[#a6b799] bg-[#1b2419] px-5 py-4 text-left text-sm font-semibold text-[#eaf1e5] transition hover:bg-[#263323]">Instalar English Chunks neste dispositivo ↗</button>
-    <p id="installHelp" hidden class="mb-6 rounded-xl border border-[#303030] p-4 text-xs leading-relaxed text-[#aaa]">Para instalar no iPhone ou iPad, abra no Safari, toque em Compartilhar e selecione “Adicionar à Tela de Início”.</p>
-    <h2 class="mb-4 text-base font-semibold">Como você quer estudar?</h2>
+    
+    <h2 class="home-section-title mb-4 text-base font-semibold">Escolha seu modo de estudo</h2>
     <section class="grid gap-4 md:grid-cols-2" aria-label="Modos de estudo">
       <button type="button" data-start="recognition" class="mode-tile group text-left">
         <span class="mode-kicker">01 / RECONHECIMENTO</span>
@@ -69,7 +68,9 @@
       <span><strong class="block font-semibold">Minha biblioteca</strong><span class="mt-1 block text-xs text-[#999]">Ver dominados, não dominados, filtrar e reclassificar.</span></span>
       <span class="text-xl text-[#aaa]" aria-hidden="true">↗</span>
     </button>
-    <p class="mt-6 text-center text-[11px] leading-relaxed text-[#777]">No estudo: toque para abrir · deslize para a esquerda para revisar · direita para dominar.<br>Teclado: ← / → para classificar · espaço para abrir · ↓ para pular.</p>
+    <p class="mt-6 text-center text-[11px] leading-relaxed text-[#777]">Toque para revelar · Arraste para classificar · Seu progresso fica salvo.</p>
+    <button id="installAppButton" hidden type="button" class="install-float" aria-label="Instalar English Chunks"><span aria-hidden="true">↓</span> Instalar English Chunks <span aria-hidden="true">↗</span></button>
+    <p id="installHelp" hidden class="install-help">No iPhone, abra no Safari, toque em Compartilhar e escolha “Adicionar à Tela de Início”.</p>
   </main>
 
   <main id="studyScreen" hidden class="screen study-screen">
@@ -119,6 +120,16 @@
       </div>
     </section>
   </main>
+
+  <div id="swipeTutorial" hidden class="swipe-tutorial" role="dialog" aria-modal="true" aria-labelledby="swipeTutorialTitle">
+    <div class="swipe-tutorial-panel">
+      <div class="swipe-demo" aria-hidden="true"><span>←</span><div class="swipe-demo-card">ENGLISH<br>CHUNKS</div><span>→</span></div>
+      <h2 id="swipeTutorialTitle">Aprenda a classificar</h2>
+      <p>Arraste para a <strong>direita</strong> quando dominar o chunk. Para a <strong>esquerda</strong> quando precisar revisar.</p>
+      <div class="swipe-legend"><span>← Não domino</span><span>Domino →</span></div>
+      <button id="dismissSwipeTutorial" type="button">Entendi, começar</button>
+    </div>
+  </div>
 
   <main id="libraryScreen" hidden class="screen mx-auto min-h-screen w-full max-w-[940px] px-4 pb-16 pt-8 sm:px-7 sm:pt-12">
     <button id="libraryBack" type="button" class="back-link back-link-flow"><span aria-hidden="true">←</span> Voltar</button>
