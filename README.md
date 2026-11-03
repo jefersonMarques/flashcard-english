@@ -1,10 +1,11 @@
 # English Chunks — Flashcards
 
-Aplicativo de estudo de inglês com 90 chunks, revisão por gestos e tradução escrita.
+Aplicativo de estudo de inglês com 170 chunks, revisão por gestos e tradução escrita.
 
 ## Funcionalidades
 
-- **Início:** progresso independente para Leitura e Tradução escrita; escolha do modo.
+- **Início:** progresso independente para Leitura e Tradução escrita; seleção de assunto e escolha do modo.
+- **Assuntos:** tempos verbais, viagens, trabalho, restaurantes, dia a dia, compras, conversas, transporte e tecnologia.
 - **Estudo:** interface sem distrações, com apenas o botão Voltar e os cartões.
 - **Leitura:** toque no primeiro cartão para revelar tradução e exemplos no segundo.
 - **Escrita:** toque no cartão em português para abrir o campo de resposta; ao enviar, veja o resultado.
@@ -45,7 +46,9 @@ Acesse `http://localhost:8080`. É possível publicar todo o conteúdo na raiz d
 
 - `index.html` — telas Início, Estudo e Biblioteca
 - `src/styles.css` — Tailwind CSS compilado + estilos complementares
-- `src/chunks.js` — os 90 chunks
+- `src/chunks.js` — os 90 chunks originais e integração dos novos assuntos
+- `src/topics.js` — 80 chunks temáticos e catálogo de assuntos
+- `src/icons.js` — ícones SVG da biblioteca Lucide incluídos localmente (licença ISC)
 - `src/answer.js` — normalização e avaliação textual
 - `src/storage.js` — compatibilidade, validação e persistência
 - `src/app.js` — navegação, interações e renderização
@@ -60,3 +63,6 @@ Acesse `http://localhost:8080`. É possível publicar todo o conteúdo na raiz d
 As chaves do `localStorage` são as mesmas das versões V3–V5. Dados do `file://`, de `localhost` e de GitHub Pages **não são compartilhados automaticamente**, por serem origens distintas. Use a exportação/importação JSON para transferir os estudos.
 
 A conferência de traduções é textual e aceita contrações comuns (por exemplo, `I'm` e `I am`). Traduções equivalentes que não correspondam ao chunk de referência podem ser apontadas como incorretas.
+## Ícones
+
+Os ícones usados na interface seguem a biblioteca [Lucide](https://lucide.dev/) e são mantidos localmente para funcionar offline. Licença ISC.
