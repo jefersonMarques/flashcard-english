@@ -114,15 +114,26 @@
                   <p id="exampleTranslation" class="text-[12px] leading-relaxed text-[#777]">Eu tive que terminar o projeto ontem.</p>
                 </div>
               </div>
-              <form id="writingForm" hidden class="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-6 px-2 text-center" autocomplete="off">
+              <div id="writingFlipStage" hidden class="writing-flip-stage">
+                <div class="writing-flip-inner">
+                  <form id="writingForm" class="writing-flip-front flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-6 px-2 text-center" autocomplete="off">
                 <div class="w-full">
                   <label for="writingInput" class="mb-3 block text-[12px] font-medium text-[#656565]">Traduza para o inglês</label>
                   <input id="writingInput" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="180" placeholder="Digite aqui" class="writing-underline w-full border-0 bg-transparent px-2 py-3 text-center text-[18px] font-medium text-[#282828] placeholder:text-[#98938a] outline-none transition duration-300">
                 </div>
                 <button id="checkAnswerButton" type="submit" class="rounded-xl border border-[#414141] bg-[#090909] px-5 py-3.5 text-[13px] font-semibold tracking-wide text-[#f5f5f5] transition duration-300 hover:bg-[#161616]">ENVIAR</button>
                 <div id="writingResult" hidden role="status" aria-live="polite" class="w-full rounded-xl border px-4 py-3 text-sm font-medium"></div>
+                <button type="button" id="revealCorrectButton" hidden class="reveal-correct-button">Revelar resposta</button>
                 <button type="button" id="retryWritingButton" hidden class="text-[12px] font-medium text-[#656565] underline underline-offset-4 transition hover:text-[#282828]">Tentar novamente</button>
-              </form>
+                  </form>
+                  <section id="writingCorrectFace" class="writing-flip-back" aria-label="Resposta correta" aria-hidden="true" inert>
+                    <span class="writing-flip-caption">RESPOSTA CORRETA</span>
+                    <strong id="writingCorrectText" class="writing-flip-answer"></strong>
+                    <p id="writingCorrectExample" class="writing-flip-example"></p>
+                    <button type="button" id="retryAfterRevealButton" class="writing-flip-retry">Tentar novamente</button>
+                  </section>
+                </div>
+              </div>
               <span id="backTense" class="text-center text-[9px] font-medium uppercase tracking-[.06em] text-[#656565]">Past</span>
             </article>
           </div>
