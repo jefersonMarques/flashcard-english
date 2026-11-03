@@ -1,3 +1,5 @@
+import { topicChunks } from "./topics.js";
+
 export const chunks = [
   {
     "id": "present-01",
@@ -719,4 +721,4 @@ export const chunks = [
     "example": "I'm getting ready to join the interview.",
     "exampleTranslation": "Estou me preparando para entrar na entrevista."
   }
-];
+].concat(topicChunks);
