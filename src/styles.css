@@ -1747,3 +1747,92 @@ body.in-study { overflow:hidden; overscroll-behavior:none; }
     font-size: 16px;
   }
 }
+
+
+/* Virada do cartão para revelar a resposta após um erro. */
+.writing-flip-stage {
+  width: 100%;
+  flex: 1 1 0%;
+  min-height: 0;
+  perspective: 1100px;
+}
+.writing-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  transform-style: preserve-3d;
+  transition: transform 540ms cubic-bezier(.2,.7,.2,1);
+}
+.writing-flip-stage.is-flipped .writing-flip-inner {
+  transform: rotateY(180deg);
+}
+.writing-flip-front,
+.writing-flip-back {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  width: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.writing-flip-front {
+  overflow-y: auto;
+}
+.writing-flip-back {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  overflow-y: auto;
+  padding: 16px;
+  text-align: center;
+  transform: rotateY(180deg);
+}
+.writing-flip-caption {
+  font-size: 10px;
+  letter-spacing: .16em;
+  font-weight: 700;
+  color: #64748b;
+}
+.writing-flip-answer {
+  font-size: clamp(19px, 3vw, 28px);
+  font-weight: 650;
+  letter-spacing: -.035em;
+  color: #065f46;
+  overflow-wrap: anywhere;
+}
+.writing-flip-example {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #666;
+}
+.reveal-correct-button,
+.writing-flip-retry {
+  border-radius: 12px;
+  padding: 12px 19px;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background .2s ease;
+}
+.reveal-correct-button {
+  color: #fff;
+  background: #334155;
+}
+.reveal-correct-button:hover { background: #475569; }
+.writing-flip-retry {
+  margin-top: 4px;
+  background: #10b981;
+  color: #052e24;
+}
+.writing-flip-retry:hover { background: #34d399; }
+@media (max-width: 767px) {
+  .writing-flip-back { gap: 10px; padding: 10px; }
+  .writing-flip-answer { font-size: clamp(17px, 6vw, 23px); }
+  .writing-flip-front { gap: 9px; }
+  .reveal-correct-button { padding: 10px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .writing-flip-inner { transition-duration: .01ms; }
+}
