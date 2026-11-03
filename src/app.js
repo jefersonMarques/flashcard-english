@@ -49,6 +49,8 @@ const state = {
   swipeTutorialSeen: localStorage.getItem("englishChunks:swipeTutorial:v1") === "seen"
 };
 
+state.topic = state.navigation.topics[state.navigation.mode] || "all";
+
 function activeProgress() {
   return state[state.mode];
 }
