@@ -405,9 +405,11 @@ function classify(status) {
   container.style.transition = "none";
   container.style.transform = currentTransform === "none" ? "translate3d(0,0,0)" : currentTransform;
   container.style.opacity = currentOpacity;
+  void container.offsetWidth;
 
   // A transição parte do deslocamento atual, sem redefinir a origem.
   requestAnimationFrame(() => {
+    if (!state.transitioning || state.screen !== "study") return;
     container.style.transition = "transform 250ms cubic-bezier(.22,.7,.25,1), opacity 250ms ease-out";
     container.style.transform = `translate3d(${distance}px, -18px, 0) rotate(${exitAngle}deg)`;
     container.style.opacity = "0";
