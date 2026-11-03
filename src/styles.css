@@ -1836,3 +1836,203 @@ body.in-study { overflow:hidden; overscroll-behavior:none; }
 @media (prefers-reduced-motion: reduce) {
   .writing-flip-inner { transition-duration: .01ms; }
 }
+
+
+/* Cartão inteiro em duas faces, mantendo proporção, margens e hierarquia. */
+.answer-card.answer-card-writing {
+  isolation: isolate;
+}
+.answer-card-writing > #backHeading,
+.answer-card-writing > #backTense {
+  visibility: hidden;
+}
+.answer-card-writing .writing-flip-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  perspective: 1200px;
+  border-radius: inherit;
+}
+.answer-card-writing .writing-flip-inner {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 510ms cubic-bezier(.25,.8,.25,1);
+}
+.answer-card-writing .writing-flip-stage.is-flipped .writing-flip-inner {
+  transform: rotateY(180deg);
+}
+.answer-card-writing .writing-flip-front,
+.answer-card-writing .writing-flip-back {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 23px 24px;
+  border-radius: inherit;
+  background: #f0ede4;
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.answer-card-writing .writing-flip-front {
+  transform: rotateY(0deg);
+}
+.answer-card-writing .writing-flip-back {
+  transform: rotateY(180deg);
+  gap: 0;
+  text-align: center;
+}
+.writing-face-header {
+  display: flex;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .055em;
+  color: #757269;
+}
+.writing-face-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 0;
+  padding: 14px 0;
+  text-align: center;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.writing-face-content label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #56534d;
+}
+.writing-face-content #writingInput {
+  display: block;
+  width: min(100%, 300px);
+  padding: 12px 8px;
+  border: 0;
+  border-bottom: 1px solid #b8b2a7;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  text-align: center;
+  font-size: 19px;
+  font-weight: 550;
+  color: #252521;
+}
+.writing-face-content #writingInput:focus {
+  border-bottom-color: #059669;
+}
+.writing-submit-button {
+  min-width: 132px;
+  padding: 13px 22px;
+  background: #171d1b;
+  border: 1px solid #171d1b;
+  border-radius: 12px;
+  color: #f8faf9;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .035em;
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+.writing-face-content .reveal-correct-button {
+  min-width: 168px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: #364338;
+  color: white;
+  font-size: 13px;
+  font-weight: 650;
+}
+.writing-face-content .reveal-correct-button:hover {
+  background: #26543b;
+}
+.writing-retry-link {
+  color: #6d6a61;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.writing-retry-link:hover { color: #292b28; }
+.writing-face-footer {
+  flex: 0 0 auto;
+  align-self: center;
+  font-size: 9px;
+  font-weight: 600;
+  color: #77736a;
+  letter-spacing: .09em;
+}
+.writing-revealed-content {
+  gap: 17px;
+}
+.writing-revealed-content .writing-flip-caption {
+  color: #688173;
+}
+.writing-revealed-content .writing-flip-answer {
+  color: #066447;
+  font-size: clamp(23px, 3.2vw, 30px);
+}
+.writing-revealed-content .writing-flip-example {
+  max-width: 290px;
+  font-size: 13px;
+  color: #77736a;
+}
+.writing-revealed-content .writing-flip-retry {
+  margin-top: 6px;
+  min-width: 170px;
+  background: #10b981;
+  color: #063d2d;
+  font-size: 13px;
+  font-weight: 700;
+}
+@media (max-width: 767px) {
+  .answer-card-writing .writing-flip-front,
+  .answer-card-writing .writing-flip-back {
+    padding: 15px 16px;
+  }
+  .writing-face-content {
+    gap: 10px;
+    padding: 9px 0;
+  }
+  .writing-face-content label { font-size: 12px; }
+  .writing-face-content #writingInput {
+    padding: 8px 5px;
+    font-size: 16px;
+  }
+  .writing-submit-button { padding: 10px 18px; }
+  .writing-revealed-content { gap: 10px; }
+  .writing-revealed-content .writing-flip-answer {
+    font-size: clamp(19px, 6vw, 25px);
+  }
+  .writing-revealed-content .writing-flip-example {
+    font-size: 12px;
+  }
+  .study-screen.keyboard-open .answer-card-writing .writing-flip-front,
+  .study-screen.keyboard-open .answer-card-writing .writing-flip-back {
+    padding: 10px 14px;
+  }
+  .study-screen.keyboard-open .writing-face-content {
+    gap: 8px;
+    padding: 7px 0;
+  }
+  .study-screen.keyboard-open .writing-face-footer { font-size: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .answer-card-writing .writing-flip-inner { transition-duration: 0.01ms; }
+}
