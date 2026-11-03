@@ -386,11 +386,7 @@ function onPointerDown(event) {
     return;
   }
   state.pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false, dx: 0 };
-  try {
-    elements.flashcardContainer.setPointerCapture(event.pointerId);
-  } catch {
-    // A captura é opcional conforme o navegador.
-  }
+
 }
 
 function onPointerMove(event) {
@@ -424,9 +420,6 @@ function onPointerUp(event) {
     return;
   }
   state.pointer = null;
-  if (elements.flashcardContainer.hasPointerCapture?.(event.pointerId)) {
-    elements.flashcardContainer.releasePointerCapture(event.pointerId);
-  }
   if (!pointer.moved) {
     return;
   }
