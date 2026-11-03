@@ -805,7 +805,7 @@ function updateKeyboardLayout() {
   const viewportTop = viewport?.offsetTop ?? 0;
   const keyboardVisible = state.mode === "writing"
     && document.activeElement === elements.writingInput
-    && window.innerHeight - visibleHeight > 120;
+    && window.matchMedia("(max-width: 767px)").matches;
 
   elements.studyScreen.style.setProperty("--study-visible-height", `${visibleHeight}px`);
   elements.studyScreen.style.setProperty("--study-offset-top", `${viewportTop}px`);
