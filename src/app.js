@@ -311,17 +311,30 @@ function classify(status) {
   const previousStatus = activeProgress()[card.id] || null;
   state.transitioning = true;
   state.history.push({ cardId: card.id, previousStatus, mode: state.mode, filter: state.filter, tense: state.tense });
-  elements.flashcardContainer.classList.remove("is-entering", "is-dragging", "is-settling");
-  elements.flashcardContainer.style.transform = "";
-  elements.flashcardContainer.style.opacity = "";
-  elements.flashcardContainer.classList.add(status === "mastered" ? "swipe-right" : "swipe-left");
+  const container = elements.flashcardContainer;
+  const startTransform = getComputedStyle(container).transform;
+  const startOpacity = Number(getComputedStyle(container).opacity);
+  const direction = status === "mastered" ? 1 : -1;
+  const exitDistance = direction * (window.innerWidth + container.offsetWidth);
+  const exitAngle = direction * 16;
 
-  window.setTimeout(() => {
+  container.classList.remove("is-entering", "is-dragging", "is-settling");
+  const animation = container.animate(
+    [
+      { transform: startTransform === "none" ? "translate3d(0,0,0)" : startTransform, opacity: startOpacity },
+      { transform: `translate3d(${exitDistance}px, -18px, 0) rotate(${exitAngle}deg)`, opacity: 0 }
+    ],
+    { duration: 240, easing: "cubic-bezier(.2,.7,.25,1)", fill: "forwards" }
+  );
+
+  animation.finished.then(() => {
     activeProgress()[card.id] = status;
     saveModeProgress();
     state.index = findResumeIndex(filteredChunks(), nextId);
     saveNavigation();
-    elements.flashcardContainer.classList.remove("swipe-left", "swipe-right");
+    animation.cancel();
+    container.style.transform = "";
+    container.style.opacity = "";
     elements.swipeHintLeft.style.opacity = "0";
     elements.swipeHintRight.style.opacity = "0";
     renderStudy();
@@ -329,7 +342,10 @@ function classify(status) {
       animateEntrance();
     }
     state.transitioning = false;
-  }, 280);
+  }).catch(() => {
+    state.transitioning = false;
+    resetDrag();
+  });
 }
 
 function undoClassification() {
@@ -419,10 +435,11 @@ function onPointerUp(event) {
   window.setTimeout(() => { state.suppressClick = false; }, 150);
   const threshold = Math.min(110, elements.flashcardContainer.offsetWidth * 0.22);
   const dx = pointer.dx;
-  resetDrag();
-  if (Math.abs(dx) >= threshold) {
-    classify(dx > 0 ? "mastered" : "learning");
+  if (event.type === "pointercancel" || Math.abs(dx) < threshold) {
+    resetDrag();
+    return;
   }
+  classify(dx > 0 ? "mastered" : "learning");
 }
 
 function submitWriting(event) {
