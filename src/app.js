@@ -361,8 +361,16 @@ function nextChunk() {
 function animateEntrance() {
   const card = elements.flashcardContainer;
   card.classList.remove("is-entering");
-  void card.offsetWidth;
-  card.classList.add("is-entering");
+  card.style.transition = "none";
+  card.style.opacity = "0";
+  card.style.transform = "translate3d(0, 14px, 0) scale(.985)";
+
+  requestAnimationFrame(() => {
+    if (state.screen !== "study") return;
+    card.style.transition = "transform 260ms cubic-bezier(.2,.8,.2,1), opacity 260ms ease-out";
+    card.style.transform = "translate3d(0, 0, 0) scale(1)";
+    card.style.opacity = "1";
+  });
 }
 
 function classify(status) {
@@ -374,43 +382,56 @@ function classify(status) {
   const before = filteredChunks();
   const nextId = before[(state.index + 1) % before.length]?.id;
   const previousStatus = activeProgress()[card.id] || null;
+
   state.transitioning = true;
-  state.history.push({ cardId: card.id, previousStatus, mode: state.mode, filter: state.filter, tense: state.tense, topic: state.topic });
+  state.history.push({
+    cardId: card.id,
+    previousStatus,
+    mode: state.mode,
+    filter: state.filter,
+    tense: state.tense,
+    topic: state.topic
+  });
+
   const container = elements.flashcardContainer;
-  const startTransform = getComputedStyle(container).transform;
-  const startOpacity = Number(getComputedStyle(container).opacity);
   const direction = status === "mastered" ? 1 : -1;
-  const exitDistance = direction * (window.innerWidth + container.offsetWidth);
+  const distance = direction * (window.innerWidth + container.offsetWidth);
   const exitAngle = direction * 16;
 
+  // Mantém a posição exata de soltura antes de iniciar a saída.
+  const currentTransform = getComputedStyle(container).transform;
+  const currentOpacity = getComputedStyle(container).opacity;
   container.classList.remove("is-entering", "is-dragging", "is-settling");
-  const animation = container.animate(
-    [
-      { transform: startTransform === "none" ? "translate3d(0,0,0)" : startTransform, opacity: startOpacity },
-      { transform: `translate3d(${exitDistance}px, -18px, 0) rotate(${exitAngle}deg)`, opacity: 0 }
-    ],
-    { duration: 240, easing: "cubic-bezier(.2,.7,.25,1)", fill: "forwards" }
-  );
+  container.style.transition = "none";
+  container.style.transform = currentTransform === "none" ? "translate3d(0,0,0)" : currentTransform;
+  container.style.opacity = currentOpacity;
 
-  animation.finished.then(() => {
+  // A transição parte do deslocamento atual, sem redefinir a origem.
+  requestAnimationFrame(() => {
+    container.style.transition = "transform 250ms cubic-bezier(.22,.7,.25,1), opacity 250ms ease-out";
+    container.style.transform = `translate3d(${distance}px, -18px, 0) rotate(${exitAngle}deg)`;
+    container.style.opacity = "0";
+  });
+
+  window.setTimeout(() => {
     activeProgress()[card.id] = status;
     saveModeProgress();
     state.index = findResumeIndex(filteredChunks(), nextId);
     saveNavigation();
-    animation.cancel();
-    container.style.transform = "";
-    container.style.opacity = "";
     elements.swipeHintLeft.style.opacity = "0";
     elements.swipeHintRight.style.opacity = "0";
     renderStudy();
+
     if (currentChunk()) {
       animateEntrance();
+    } else {
+      container.style.transition = "";
+      container.style.transform = "";
+      container.style.opacity = "";
     }
+
     state.transitioning = false;
-  }).catch(() => {
-    state.transitioning = false;
-    resetDrag();
-  });
+  }, 285);
 }
 
 function undoClassification() {
@@ -436,10 +457,11 @@ function undoClassification() {
 
 function resetDrag() {
   const card = elements.flashcardContainer;
-  card.classList.remove("is-dragging");
+  card.classList.remove("is-dragging", "is-entering");
   card.classList.add("is-settling");
-  card.style.transform = "";
-  card.style.opacity = "";
+  card.style.transition = "transform 220ms cubic-bezier(.22,.7,.25,1), opacity 220ms ease-out";
+  card.style.transform = "translate3d(0,0,0) rotate(0deg)";
+  card.style.opacity = "1";
   elements.swipeHintLeft.style.opacity = "0";
   elements.swipeHintRight.style.opacity = "0";
 }
@@ -474,6 +496,7 @@ function onPointerMove(event) {
   }
   elements.flashcardContainer.classList.remove("is-settling", "is-entering");
   elements.flashcardContainer.classList.add("is-dragging");
+  elements.flashcardContainer.style.transition = "none";
   elements.flashcardContainer.style.transform = `translate3d(${dx}px, 0, 0) rotate(${dx / 28}deg)`;
   elements.flashcardContainer.style.opacity = String(Math.max(0.65, 1 - Math.abs(dx) / 700));
   elements.swipeHintLeft.style.opacity = dx < 0 ? String(Math.min(1, -dx / 80)) : "0";
