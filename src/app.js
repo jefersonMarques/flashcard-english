@@ -23,7 +23,7 @@ const elements = Object.fromEntries(
     "emptyBack", "libraryBack", "studyEmpty", "flashcardContainer",
     "flashcardGrid", "revealButton", "answerPanel", "frontLanguage",
     "frontText", "frontTense", "swipeHintLeft", "swipeHintRight",
-    "backHeading", "readingAnswerContent", "translationText", "exampleText",
+    "backHeading", "answerCard", "readingAnswerContent", "translationText", "exampleText",
     "exampleTranslation", "backTense", "writingForm", "writingInput",
     "checkAnswerButton", "writingResult", "retryWritingButton",
     "writingFlipStage", "writingCorrectFace", "writingCorrectText", "writingCorrectExample",
@@ -264,6 +264,7 @@ function renderStudy() {
   elements.backHeading.textContent = isWriting ? "Sua resposta em inglês" : "Tradução + exemplo";
   elements.readingAnswerContent.hidden = isWriting;
   elements.writingFlipStage.hidden = !isWriting;
+  elements.answerCard.classList.toggle("answer-card-writing", isWriting);
   elements.translationText.textContent = chunk.translation;
   elements.exampleText.textContent = chunk.example;
   elements.exampleTranslation.textContent = chunk.exampleTranslation;
@@ -663,17 +664,9 @@ function submitWriting(event) {
   button.classList.add(result.correct ? "is-correct" : "is-incorrect");
   button.textContent = result.correct ? "ACERTOU!" : "ERROU";
 
-  elements.writingResult.hidden = false;
-  elements.writingResult.className = "writing-feedback " + (result.correct
-    ? "writing-feedback-correct"
-    : "writing-feedback-incorrect");
-  elements.writingResult.replaceChildren();
-
-  const message = document.createElement("strong");
-  message.textContent = result.correct
-    ? "Parabéns, você acertou!"
-    : "Infelizmente, está errado.";
-  elements.writingResult.append(message);
+  // O próprio botão informa o resultado, evitando mensagens duplicadas.
+  elements.writingResult.hidden = true;
+  elements.writingResult.textContent = "";
 
   elements.revealCorrectButton.hidden = result.correct;
   elements.retryWritingButton.hidden = result.correct;
@@ -697,8 +690,9 @@ function revealCorrectAnswer() {
 
   elements.writingCorrectText.textContent = chunk.front;
   elements.writingCorrectExample.textContent = chunk.example;
-  elements.writingCorrectFace.removeAttribute("inert");
+  elements.writingInput.blur();
   elements.writingForm.setAttribute("inert", "");
+  elements.writingCorrectFace.removeAttribute("inert");
   elements.writingCorrectFace.setAttribute("aria-hidden", "false");
   elements.writingFlipStage.classList.add("is-flipped");
   elements.revealCorrectButton.disabled = true;
