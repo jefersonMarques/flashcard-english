@@ -479,7 +479,10 @@ function onPointerDown(event) {
   if (event.pointerType === "touch" || event.button !== 0 || state.screen !== "study" || state.pointer || state.transitioning || !currentChunk()) {
     return;
   }
-  if (event.target instanceof Element && event.target.closest("#writingForm")) {
+  if (
+    event.target instanceof Element
+    && event.target.closest("#studyBack, #emptyBack, input, textarea, select, button:not(#revealButton), [contenteditable='true']")
+  ) {
     return;
   }
   state.pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false, dx: 0 };
@@ -542,7 +545,10 @@ function onTouchStart(event) {
     || state.transitioning
     || !currentChunk()
     || !elements.swipeTutorial.hidden
-    || event.target.closest("#writingForm")
+    || (
+      event.target instanceof Element
+      && event.target.closest("#studyBack, #emptyBack, input, textarea, select, button:not(#revealButton), [contenteditable='true']")
+    )
   ) {
     return;
   }
@@ -815,8 +821,8 @@ elements.revealButton.addEventListener("click", () => {
 });
 elements.writingForm.addEventListener("submit", submitWriting);
 elements.retryWritingButton.addEventListener("click", retryWriting);
-elements.flashcardContainer.addEventListener("pointerdown", onPointerDown);
-elements.flashcardContainer.addEventListener("touchstart", onTouchStart, { passive: true });
+elements.studyScreen.addEventListener("pointerdown", onPointerDown);
+elements.studyScreen.addEventListener("touchstart", onTouchStart, { passive: true });
 window.addEventListener("touchmove", onTouchMove, { passive: false });
 window.addEventListener("touchend", onTouchEnd, { passive: false });
 window.addEventListener("touchcancel", onTouchEnd, { passive: false });
