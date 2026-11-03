@@ -360,14 +360,22 @@ function nextChunk() {
 
 function animateEntrance() {
   const card = elements.flashcardContainer;
-  card.classList.remove("is-entering");
+  card.classList.remove("is-entering", "is-dragging", "is-settling");
+
+  // A nova carta começa abaixo da posição final, nunca da lateral.
   card.style.transition = "none";
+  card.style.transform = "translate3d(0, 88px, 0) scale(.97)";
   card.style.opacity = "0";
-  card.style.transform = "translate3d(0, 14px, 0) scale(.985)";
+
+  // Confirma o quadro inicial antes de começar a transição de entrada.
+  void card.offsetWidth;
 
   requestAnimationFrame(() => {
-    if (state.screen !== "study") return;
-    card.style.transition = "transform 260ms cubic-bezier(.2,.8,.2,1), opacity 260ms ease-out";
+    if (state.screen !== "study") {
+      return;
+    }
+
+    card.style.transition = "transform 320ms cubic-bezier(.2,.8,.2,1), opacity 320ms ease-out";
     card.style.transform = "translate3d(0, 0, 0) scale(1)";
     card.style.opacity = "1";
   });
@@ -416,14 +424,19 @@ function classify(status) {
     saveNavigation();
     elements.swipeHintLeft.style.opacity = "0";
     elements.swipeHintRight.style.opacity = "0";
+
+    // Mantém o cartão invisível enquanto o conteúdo é substituído.
+    container.style.transition = "none";
+    container.style.transform = "translate3d(0, 88px, 0) scale(.97)";
+    container.style.opacity = "0";
     renderStudy();
 
     if (currentChunk()) {
       animateEntrance();
     } else {
-      container.style.transition = "";
       container.style.transform = "";
       container.style.opacity = "";
+      container.style.transition = "";
     }
 
     state.transitioning = false;
