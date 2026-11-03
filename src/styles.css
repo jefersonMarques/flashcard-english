@@ -2036,3 +2036,42 @@ body.in-study { overflow:hidden; overscroll-behavior:none; }
 @media (prefers-reduced-motion: reduce) {
   .answer-card-writing .writing-flip-inner { transition-duration: 0.01ms; }
 }
+
+
+/* Feedback temporário sem empilhar ações no cartão. */
+.answer-card-writing .writing-submit-button,
+.answer-card-writing .writing-face-content .reveal-correct-button,
+.answer-card-writing .writing-face-content .writing-retry-link,
+.answer-card-writing .writing-revealed-content .writing-flip-retry {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  text-align: center;
+}
+.answer-card-writing .writing-submit-button {
+  flex: 0 0 auto;
+  transition: background-color 200ms ease, border-color 200ms ease,
+    color 200ms ease, opacity 260ms ease, transform 260ms ease;
+}
+.answer-card-writing .writing-submit-button.is-fading {
+  opacity: 0;
+  transform: translateY(-7px);
+  pointer-events: none;
+}
+.answer-card-writing .writing-submit-button[hidden],
+.answer-card-writing .reveal-correct-button[hidden],
+.answer-card-writing .writing-retry-link[hidden] {
+  display: none !important;
+}
+.answer-card-writing .writing-face-content #writingInput.is-correct {
+  color: #047857;
+  border-bottom-color: #10b981;
+  -webkit-text-fill-color: #047857;
+}
+.answer-card-writing .writing-face-content #writingInput.is-incorrect {
+  color: #be123c;
+  border-bottom-color: #fb7185;
+  -webkit-text-fill-color: #be123c;
+}
