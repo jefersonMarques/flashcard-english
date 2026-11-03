@@ -26,6 +26,8 @@ const elements = Object.fromEntries(
     "backHeading", "readingAnswerContent", "translationText", "exampleText",
     "exampleTranslation", "backTense", "writingForm", "writingInput",
     "checkAnswerButton", "writingResult", "retryWritingButton",
+    "writingFlipStage", "writingCorrectFace", "writingCorrectText", "writingCorrectExample",
+    "revealCorrectButton", "retryAfterRevealButton",
     "libraryMode", "libraryStatus", "libraryTense", "librarySearch",
     "libraryCount", "libraryList", "libraryEmpty", "exportProgress",
     "importProgress", "backupFeedback", "swipeTutorial", "dismissSwipeTutorial",
@@ -235,6 +237,12 @@ function resetWritingForm() {
   elements.checkAnswerButton.textContent = "ENVIAR";
   elements.checkAnswerButton.classList.remove("is-correct", "is-incorrect");
   elements.retryWritingButton.hidden = true;
+  elements.revealCorrectButton.hidden = true;
+  elements.writingFlipStage.classList.remove("is-flipped");
+  elements.writingCorrectFace.setAttribute("aria-hidden", "true");
+  elements.writingCorrectFace.setAttribute("inert", "");
+  elements.writingCorrectText.textContent = "";
+  elements.writingCorrectExample.textContent = "";
 }
 
 function renderStudy() {
@@ -253,7 +261,7 @@ function renderStudy() {
   elements.frontTense.textContent = chunk.topic ? topics.find((topic) => topic.id === chunk.topic)?.title || "Conversation" : tenseLabels[chunk.tense];
   elements.backHeading.textContent = isWriting ? "Sua resposta em inglês" : "Tradução + exemplo";
   elements.readingAnswerContent.hidden = isWriting;
-  elements.writingForm.hidden = !isWriting;
+  elements.writingFlipStage.hidden = !isWriting;
   elements.translationText.textContent = chunk.translation;
   elements.exampleText.textContent = chunk.example;
   elements.exampleTranslation.textContent = chunk.exampleTranslation;
@@ -665,21 +673,38 @@ function submitWriting(event) {
     : "Infelizmente, está errado.";
   elements.writingResult.append(message);
 
-  if (!result.correct) {
-    const answerLabel = document.createElement("span");
-    answerLabel.className = "writing-correct-answer";
-    answerLabel.textContent = `Resposta correta: ${chunk.front}`;
-    elements.writingResult.append(answerLabel);
-  }
-
+  elements.revealCorrectButton.hidden = result.correct;
   elements.retryWritingButton.hidden = result.correct;
   elements.writingInput.disabled = true;
   elements.writingInput.blur();
   updateKeyboardLayout();
 }
 
+function revealCorrectAnswer() {
+  const chunk = currentChunk();
+  const lastAttempt = chunk && state.attempts[chunk.id];
+  if (
+    !chunk
+    || state.mode !== "writing"
+    || state.screen !== "study"
+    || lastAttempt?.correct !== false
+    || !elements.writingFlipStage.classList.contains("is-flipped") && elements.revealCorrectButton.hidden
+  ) {
+    return;
+  }
+
+  elements.writingCorrectText.textContent = chunk.front;
+  elements.writingCorrectExample.textContent = chunk.example;
+  elements.writingCorrectFace.removeAttribute("inert");
+  elements.writingCorrectFace.setAttribute("aria-hidden", "false");
+  elements.writingFlipStage.classList.add("is-flipped");
+  elements.revealCorrectButton.disabled = true;
+  elements.retryAfterRevealButton.focus({ preventScroll: true });
+}
+
 function retryWriting() {
   resetWritingForm();
+  elements.revealCorrectButton.disabled = false;
   elements.writingInput.focus();
 }
 
@@ -873,6 +898,8 @@ elements.writingInput.addEventListener("blur", () => {
 window.visualViewport?.addEventListener("resize", updateKeyboardLayout);
 window.visualViewport?.addEventListener("scroll", updateKeyboardLayout);
 elements.retryWritingButton.addEventListener("click", retryWriting);
+elements.revealCorrectButton.addEventListener("click", revealCorrectAnswer);
+elements.retryAfterRevealButton.addEventListener("click", retryWriting);
 elements.studyScreen.addEventListener("pointerdown", onPointerDown);
 elements.studyScreen.addEventListener("touchstart", onTouchStart, { passive: true });
 window.addEventListener("touchmove", onTouchMove, { passive: false });
