@@ -48,6 +48,8 @@ const state = {
   pointer: null,
   suppressClick: false,
   history: [],
+  feedbackTimer: null,
+  feedbackHideTimer: null,
   swipeTutorialSeen: localStorage.getItem("englishChunks:swipeTutorial:v1") === "seen"
 };
 
@@ -228,14 +230,20 @@ function setRevealed(visible) {
 }
 
 function resetWritingForm() {
+  clearTimeout(state.feedbackTimer);
+  clearTimeout(state.feedbackHideTimer);
+  state.feedbackTimer = null;
+  state.feedbackHideTimer = null;
   elements.writingInput.value = "";
   elements.writingInput.disabled = false;
+  elements.writingInput.readOnly = false;
+  elements.writingInput.classList.remove("is-correct", "is-incorrect");
   elements.writingResult.hidden = true;
   elements.writingResult.textContent = "";
   elements.checkAnswerButton.hidden = false;
   elements.checkAnswerButton.disabled = false;
+  elements.checkAnswerButton.classList.remove("is-fading", "is-correct", "is-incorrect");
   elements.checkAnswerButton.textContent = "ENVIAR";
-  elements.checkAnswerButton.classList.remove("is-correct", "is-incorrect");
   elements.retryWritingButton.hidden = true;
   elements.revealCorrectButton.hidden = true;
   elements.revealCorrectButton.disabled = false;
@@ -659,20 +667,40 @@ function submitWriting(event) {
   writeJson(STORAGE_KEYS.attempts, state.attempts);
 
   const button = elements.checkAnswerButton;
+  const feedbackClass = result.correct ? "is-correct" : "is-incorrect";
   button.disabled = true;
-  button.classList.remove("is-correct", "is-incorrect");
-  button.classList.add(result.correct ? "is-correct" : "is-incorrect");
+  button.classList.remove("is-correct", "is-incorrect", "is-fading");
+  button.classList.add(feedbackClass);
   button.textContent = result.correct ? "ACERTOU!" : "ERROU";
 
-  // O próprio botão informa o resultado, evitando mensagens duplicadas.
+  // A resposta digitada mantém a cor de avaliação sem criar outra mensagem.
+  elements.writingInput.readOnly = true;
+  elements.writingInput.classList.remove("is-correct", "is-incorrect");
+  elements.writingInput.classList.add(feedbackClass);
   elements.writingResult.hidden = true;
   elements.writingResult.textContent = "";
-
-  elements.revealCorrectButton.hidden = result.correct;
-  elements.retryWritingButton.hidden = result.correct;
-  elements.writingInput.disabled = true;
+  elements.revealCorrectButton.hidden = true;
+  elements.retryWritingButton.hidden = true;
   elements.writingInput.blur();
   updateKeyboardLayout();
+
+  const currentId = chunk.id;
+  state.feedbackTimer = window.setTimeout(() => {
+    if (currentChunk()?.id !== currentId || state.screen !== "study") return;
+
+    button.classList.add("is-fading");
+    state.feedbackHideTimer = window.setTimeout(() => {
+      if (currentChunk()?.id !== currentId || state.screen !== "study") return;
+
+      button.hidden = true;
+      if (!result.correct) {
+        elements.revealCorrectButton.hidden = false;
+        elements.retryWritingButton.hidden = false;
+      }
+      state.feedbackHideTimer = null;
+    }, 280);
+    state.feedbackTimer = null;
+  }, 2200);
 }
 
 function revealCorrectAnswer() {
