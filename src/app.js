@@ -240,6 +240,7 @@ function resetWritingForm() {
   elements.writingInput.classList.remove("is-correct", "is-incorrect");
   elements.writingResult.hidden = true;
   elements.writingResult.textContent = "";
+  elements.writingResult.className = "writing-status-badge";
   elements.checkAnswerButton.hidden = false;
   elements.checkAnswerButton.disabled = false;
   elements.checkAnswerButton.classList.remove("is-fading", "is-correct", "is-incorrect");
@@ -666,19 +667,19 @@ function submitWriting(event) {
   state.attempts[chunk.id] = result;
   writeJson(STORAGE_KEYS.attempts, state.attempts);
 
-  const button = elements.checkAnswerButton;
   const feedbackClass = result.correct ? "is-correct" : "is-incorrect";
-  button.disabled = true;
-  button.classList.remove("is-correct", "is-incorrect", "is-fading");
-  button.classList.add(feedbackClass);
-  button.textContent = result.correct ? "ACERTOU!" : "ERROU";
+  elements.checkAnswerButton.hidden = true;
+  elements.checkAnswerButton.disabled = true;
 
-  // A resposta digitada mantém a cor de avaliação sem criar outra mensagem.
   elements.writingInput.readOnly = true;
   elements.writingInput.classList.remove("is-correct", "is-incorrect");
   elements.writingInput.classList.add(feedbackClass);
-  elements.writingResult.hidden = true;
-  elements.writingResult.textContent = "";
+
+  const badge = elements.writingResult;
+  badge.className = `writing-status-badge ${feedbackClass}`;
+  badge.textContent = result.correct ? "ACERTOU!" : "ERROU";
+  badge.hidden = false;
+
   elements.revealCorrectButton.hidden = true;
   elements.retryWritingButton.hidden = true;
   elements.writingInput.blur();
@@ -688,19 +689,20 @@ function submitWriting(event) {
   state.feedbackTimer = window.setTimeout(() => {
     if (currentChunk()?.id !== currentId || state.screen !== "study") return;
 
-    button.classList.add("is-fading");
+    badge.classList.add("is-fading");
     state.feedbackHideTimer = window.setTimeout(() => {
       if (currentChunk()?.id !== currentId || state.screen !== "study") return;
 
-      button.hidden = true;
+      badge.hidden = true;
+      badge.classList.remove("is-fading");
       if (!result.correct) {
         elements.revealCorrectButton.hidden = false;
         elements.retryWritingButton.hidden = false;
       }
       state.feedbackHideTimer = null;
-    }, 280);
+    }, 180);
     state.feedbackTimer = null;
-  }, 2200);
+  }, 850);
 }
 
 function revealCorrectAnswer() {
