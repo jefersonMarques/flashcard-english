@@ -231,6 +231,9 @@ function resetWritingForm() {
   elements.writingResult.hidden = true;
   elements.writingResult.textContent = "";
   elements.checkAnswerButton.hidden = false;
+  elements.checkAnswerButton.disabled = false;
+  elements.checkAnswerButton.textContent = "ENVIAR";
+  elements.checkAnswerButton.classList.remove("is-correct", "is-incorrect");
   elements.retryWritingButton.hidden = true;
 }
 
@@ -294,6 +297,9 @@ function showScreen(name) {
   elements.libraryScreen.hidden = name !== "library";
   document.body.classList.toggle("in-study", name === "study");
   if (name !== "study") {
+    elements.studyScreen.classList.remove("keyboard-open");
+    elements.studyScreen.style.removeProperty("--study-visible-height");
+    elements.studyScreen.style.removeProperty("--study-offset-top");
     elements.swipeTutorial.hidden = true;
     leaveImmersiveMode();
   }
@@ -303,6 +309,7 @@ function showScreen(name) {
     renderHome();
   } else if (name === "study") {
     renderStudy();
+    updateKeyboardLayout();
     showSwipeTutorial();
   } else {
     renderLibrary();
@@ -639,16 +646,36 @@ function submitWriting(event) {
   const result = evaluateAnswer(answer, chunk.front);
   state.attempts[chunk.id] = result;
   writeJson(STORAGE_KEYS.attempts, state.attempts);
+
+  const button = elements.checkAnswerButton;
+  button.disabled = true;
+  button.classList.remove("is-correct", "is-incorrect");
+  button.classList.add(result.correct ? "is-correct" : "is-incorrect");
+  button.textContent = result.correct ? "ACERTOU!" : "ERROU";
+
   elements.writingResult.hidden = false;
-  elements.writingResult.className = "w-full rounded-xl border px-4 py-3 text-sm font-semibold " + (result.correct
-    ? "border-[#829c75] bg-[#dce7d3] text-[#31552d]"
-    : "border-[#c69389] bg-[#f3ddd8] text-[#803e34]");
-  elements.writingResult.textContent = result.correct
+  elements.writingResult.className = "writing-feedback " + (result.correct
+    ? "writing-feedback-correct"
+    : "writing-feedback-incorrect");
+  elements.writingResult.replaceChildren();
+
+  const message = document.createElement("strong");
+  message.textContent = result.correct
     ? "Parabéns, você acertou!"
     : "Infelizmente, está errado.";
-  elements.writingInput.disabled = true;
-  elements.checkAnswerButton.hidden = true;
+  elements.writingResult.append(message);
+
+  if (!result.correct) {
+    const answerLabel = document.createElement("span");
+    answerLabel.className = "writing-correct-answer";
+    answerLabel.textContent = `Resposta correta: ${chunk.front}`;
+    elements.writingResult.append(answerLabel);
+  }
+
   elements.retryWritingButton.hidden = result.correct;
+  elements.writingInput.disabled = true;
+  elements.writingInput.blur();
+  updateKeyboardLayout();
 }
 
 function retryWriting() {
@@ -770,6 +797,21 @@ async function importProgress(event) {
   }
 }
 
+function updateKeyboardLayout() {
+  if (state.screen !== "study") return;
+
+  const viewport = window.visualViewport;
+  const visibleHeight = viewport?.height ?? window.innerHeight;
+  const viewportTop = viewport?.offsetTop ?? 0;
+  const keyboardVisible = state.mode === "writing"
+    && document.activeElement === elements.writingInput
+    && window.innerHeight - visibleHeight > 120;
+
+  elements.studyScreen.style.setProperty("--study-visible-height", `${visibleHeight}px`);
+  elements.studyScreen.style.setProperty("--study-offset-top", `${viewportTop}px`);
+  elements.studyScreen.classList.toggle("keyboard-open", keyboardVisible);
+}
+
 function onKeyDown(event) {
   if (state.screen !== "study" || state.transitioning || !elements.swipeTutorial.hidden) {
     return;
@@ -820,6 +862,16 @@ elements.revealButton.addEventListener("click", () => {
   }
 });
 elements.writingForm.addEventListener("submit", submitWriting);
+elements.writingInput.addEventListener("focus", () => {
+  updateKeyboardLayout();
+  requestAnimationFrame(updateKeyboardLayout);
+});
+elements.writingInput.addEventListener("blur", () => {
+  elements.studyScreen.classList.remove("keyboard-open");
+  requestAnimationFrame(updateKeyboardLayout);
+});
+window.visualViewport?.addEventListener("resize", updateKeyboardLayout);
+window.visualViewport?.addEventListener("scroll", updateKeyboardLayout);
 elements.retryWritingButton.addEventListener("click", retryWriting);
 elements.studyScreen.addEventListener("pointerdown", onPointerDown);
 elements.studyScreen.addEventListener("touchstart", onTouchStart, { passive: true });
