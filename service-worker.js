@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "english-chunks-static-";
-const CACHE_VERSION = "v3";
+const CACHE_VERSION = "v4";
 const CACHE_NAME = `${CACHE_PREFIX}${CACHE_VERSION}`;
 
 const OFFLINE_ASSETS = [
@@ -9,6 +9,8 @@ const OFFLINE_ASSETS = [
   "./src/app.js",
   "./src/answer.js",
   "./src/chunks.js",
+  "./src/topics.js",
+  "./src/icons.js",
   "./src/storage.js",
   "./src/styles.css",
   "./src/pwa.js",
