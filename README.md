@@ -13,6 +13,15 @@ Aplicativo de estudo de inglês com 90 chunks, revisão por gestos e tradução 
 - **Persistência:** `localStorage`, incluindo a posição em cada trilha.
 - **Backup:** exportação e importação de progresso em JSON para mover entre navegadores e domínios.
 
+## Instalar como aplicativo (PWA)
+
+- Publique via **HTTPS** (por exemplo, GitHub Pages) ou execute em `localhost`.
+- No Chrome/Edge, use o botão **Instalar** na página ou a opção do navegador.
+- No iPhone/iPad, abra no Safari, toque em **Compartilhar** e **Adicionar à Tela de Início**.
+- Após a instalação do service worker e o primeiro carregamento online, os arquivos da aplicação ficam disponíveis offline.
+- O progresso continua salvo no `localStorage` do dispositivo, sem sincronização automática entre navegadores.
+- Para atualizar os arquivos offline após futuras publicações, incremente `CACHE_VERSION` em `service-worker.js`.
+
 ## Executar
 
 Não há dependências de instalação ou build. Use um servidor estático local:
@@ -40,6 +49,10 @@ Acesse `http://localhost:8080`. É possível publicar todo o conteúdo na raiz d
 - `src/answer.js` — normalização e avaliação textual
 - `src/storage.js` — compatibilidade, validação e persistência
 - `src/app.js` — navegação, interações e renderização
+- `src/pwa.js` — instalação e registro do service worker
+- `manifest.webmanifest` — metadados de instalação
+- `service-worker.js` — cache offline dos arquivos estáticos
+- `icons/` — ícones do aplicativo
 - `tests/` — testes automatizados
 
 ## Compatibilidade
