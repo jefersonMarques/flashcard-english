@@ -2126,3 +2126,24 @@ body.in-study { overflow:hidden; overscroll-behavior:none; }
 @media (prefers-reduced-motion: reduce) {
   .answer-card-writing .writing-status-badge { transition: none; }
 }
+
+
+/* O status ocupa uma faixa reservada imediatamente abaixo do campo. */
+.answer-card-writing .writing-status-slot {
+  display: flex;
+  flex: 0 0 30px;
+  width: 100%;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+}
+.answer-card-writing .writing-status-slot .writing-status-badge {
+  position: static;
+  inset: auto;
+  transform: none;
+  flex: 0 0 auto;
+}
+.answer-card-writing .writing-status-slot .writing-status-badge.is-fading {
+  opacity: 0;
+  transform: translateY(-6px) scale(.94);
+}
