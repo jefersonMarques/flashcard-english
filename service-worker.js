@@ -13,8 +13,7 @@ const OFFLINE_ASSETS = [
   "./src/styles.css",
   "./src/pwa.js",
   "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/icon-maskable-512.png"
+  "./icons/icon-512.svg"
 ];
 
 self.addEventListener("install", (event) => {
