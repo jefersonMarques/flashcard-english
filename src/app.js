@@ -240,6 +240,7 @@ function resetWritingForm() {
   elements.revealCorrectButton.hidden = true;
   elements.revealCorrectButton.disabled = false;
   elements.writingFlipStage.classList.remove("is-flipped");
+  elements.writingForm.removeAttribute("inert");
   elements.writingCorrectFace.setAttribute("aria-hidden", "true");
   elements.writingCorrectFace.setAttribute("inert", "");
   elements.writingCorrectText.textContent = "";
@@ -697,6 +698,7 @@ function revealCorrectAnswer() {
   elements.writingCorrectText.textContent = chunk.front;
   elements.writingCorrectExample.textContent = chunk.example;
   elements.writingCorrectFace.removeAttribute("inert");
+  elements.writingForm.setAttribute("inert", "");
   elements.writingCorrectFace.setAttribute("aria-hidden", "false");
   elements.writingFlipStage.classList.add("is-flipped");
   elements.revealCorrectButton.disabled = true;
