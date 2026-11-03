@@ -1,4 +1,5 @@
 import { chunks } from "./chunks.js";
+import { topics } from "./topics.js";
 
 export const STORAGE_KEYS = Object.freeze({
   recognition: "english_chunks_progress_v1",
@@ -12,6 +13,7 @@ const allowedStatuses = new Set(["mastered", "learning"]);
 const allowedModes = new Set(["recognition", "writing"]);
 const allowedFilters = new Set(["study", "learning", "mastered", "all"]);
 const allowedTenses = new Set(["all", "present", "past", "future"]);
+const allowedTopics = new Set(["all", ...topics.map((topic) => topic.id)]);
 
 function readJson(key) {
   try {
@@ -62,6 +64,7 @@ export function cleanNavigation(value) {
     tense: "all",
     mode: "recognition",
     positions: {},
+    topics: { recognition: "all", writing: "all" },
     selections: {
       recognition: { filter: "study", tense: "all" },
       writing: { filter: "study", tense: "all" }
@@ -75,6 +78,9 @@ export function cleanNavigation(value) {
   navigation.filter = allowedFilters.has(value.filter) ? value.filter : "study";
   navigation.tense = allowedTenses.has(value.tense) ? value.tense : "all";
   navigation.mode = allowedModes.has(value.mode) ? value.mode : "recognition";
+  for (const mode of allowedModes) {
+    navigation.topics[mode] = allowedTopics.has(value.topics?.[mode]) ? value.topics[mode] : "all";
+  }
 
   const oldRecognition = value.selections?.recognition;
   navigation.selections.recognition = {
@@ -90,7 +96,7 @@ export function cleanNavigation(value) {
 
   if (value.positions && typeof value.positions === "object" && !Array.isArray(value.positions)) {
     for (const [key, id] of Object.entries(value.positions)) {
-      if (allowedIds.has(id) && /^(writing:)?(study|learning|mastered|all):(all|present|past|future)$/.test(key)) {
+      if (allowedIds.has(id) && /^(topic:[a-z]+:)?(writing:)?(study|learning|mastered|all):(all|present|past|future)$/.test(key)) {
         navigation.positions[key] = id;
       }
     }
